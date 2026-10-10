@@ -715,7 +715,7 @@ function fillSide(f,i){
 function renderStage(f){
   ZS=null; stageSeq++;
   if(f.cat==='image') return imageStage(f);
-  if(f.ext==='pdf') return frameStage(f.url,f.name,false);
+  if(f.ext==='pdf') return frameStage(toCdn(f.url),f.name,false);
   if(OFFICE.includes(f.ext)) return officeStage(f);
   if(f.ext==='html'||f.ext==='htm') return frameStage(f.url,f.name,true);
   if(f.cat==='text') return textStage(f);
