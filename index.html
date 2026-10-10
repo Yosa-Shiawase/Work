@@ -735,7 +735,7 @@ function otherStage(f,msg){
     <h3>${esc(f.name)}</h3>
     <p class="mono dim" style="font-size:10px;letter-spacing:.16em">${esc(msg||('NO INLINE PREVIEW · '+fmtSize(f.size)))}</p>
     <div class="rowbtns">
-      <a class="btn" href="${f.url}" ${f.local?'':`download="${esc(f.name)"`}>${icon('download',13)} DOWNLOAD</a>
+      <a class="btn" href="${f.url}" ${f.local?'':`download="${esc(f.name)}"`}>${icon('download',13)} DOWNLOAD</a>
       <a class="btn" href="${f.url}" target="_blank" rel="noopener">${icon('upright',13)} OPEN RAW</a>
     </div>
   </div>`;
