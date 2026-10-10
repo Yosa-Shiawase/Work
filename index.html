@@ -728,7 +728,7 @@ function frameStage(url,name,sandbox){
 }
 function officeStage(f){
   if(f.abs&&f.abs.startsWith('https://')){
-    stage.innerHTML=`<iframe class="frame" title="${esc(f.name)}" src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(f.abs)}"></iframe>`;
+     stage.innerHTML=`<iframe class="frame" title="${esc(f.name)}" src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(toCdn(f.abs))}"></iframe>`;
   }else{
     otherStage(f,'INLINE PREVIEW NEEDS A PUBLIC HTTPS URL — USE DOWNLOAD');
   }
