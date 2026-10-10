@@ -466,6 +466,10 @@ function isExcluded(p){
   return p.split('/').some(s=>s.startsWith('.'));
 }
 const rawURL=(o,r,b,p)=>`https://raw.githubusercontent.com/${o}/${r}/${b}/${p.split('/').map(encodeURIComponent).join('/')}`;
+  function toCdn(u){
+  const m=String(u).match(/^https:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/);
+  return m ? 'https://cdn.jsdelivr.net/gh/'+m[1]+'/'+m[2]+'@'+m[3]+'/'+m[4] : u;
+  }
 
 const state={files:[],filtered:[],cat:'all',q:'',sort:'name-asc',view:'index',curIdx:-1,open:false,source:'FILES.JSON'};
 const indexEl=$('#index'), stage=$('#stage'), viewer=$('#viewer'), peek=$('#peek');
