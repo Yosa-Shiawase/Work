@@ -716,7 +716,7 @@ function fillSide(f,i){
 function renderStage(f){
   ZS=null; stageSeq++;
   if(f.cat==='image') return imageStage(f);
-  if(f.ext==='pdf') return frameStage(toCdn(f.url),f.name,false);
+  if(f.ext==='pdf') return pdfStage(f);
   if(OFFICE.includes(f.ext)) return officeStage(f);
   if(f.ext==='html'||f.ext==='htm') return frameStage(f.url,f.name,true);
   if(f.cat==='text') return textStage(f);
@@ -724,6 +724,50 @@ function renderStage(f){
   if(AUDIO.includes(f.ext)) return mediaStage(f,'audio');
   return otherStage(f);
 }
+function pdfStage(f){
+  const seq=stageSeq;
+  if(!window.pdfjsLib){ otherStage(f,'PDF ENGINE FAILED TO LOAD — TRY OPEN RAW'); return; }
+  stage.innerHTML=`<div class="scrollpane"><div class="loadrow"><span class="spin"></span>LOADING PDF</div></div>`;
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  pdfjsLib.getDocument({url:toCdn(f.url)}).promise.then(pdf=>{
+    if(seq!==stageSeq) return;
+    const pane=stage.querySelector('.scrollpane'); if(!pane) return;
+    const lr=pane.querySelector('.loadrow');
+    const cw=Math.min(pane.clientWidth-36,900);
+    let n=1;
+    const step=()=>{
+      if(seq!==stageSeq||!stage.contains(pane)) return;
+      if(n>pdf.numPages){
+        if(lr) lr.remove();
+        const end=document.createElement('p');
+        end.style.cssText='text-align:center;padding:10px 0 46px;font:500 10px var(--mono);letter-spacing:.18em;color:var(--ink2)';
+        end.textContent=`— END · ${pdf.numPages} PAGE${pdf.numPages===1?'':'S'} —`;
+        pane.appendChild(end);
+        return;
+      }
+      if(lr) lr.lastChild.textContent=`RENDERING PAGE ${n} / ${pdf.numPages}`;
+      pdf.getPage(n).then(p=>{
+        if(seq!==stageSeq||!stage.contains(pane)) return;
+        const dpr=Math.min(window.devicePixelRatio||1,2);
+        const v0=p.getViewport({scale:1});
+        const s=Math.min(cw/v0.width,3);
+        const vp=p.getViewport({scale:s*dpr});
+        const c=document.createElement('canvas');
+        c.width=Math.floor(vp.width); c.height=Math.floor(vp.height);
+        c.style.cssText=`display:block;margin:16px auto;width:${Math.round(v0.width*s)}px;max-width:calc(100% - 16px);height:auto;border:1px solid var(--line2);box-shadow:6px 7px 0 rgba(27,23,18,.12);background:#fff`;
+        pane.appendChild(c);
+        const task=p.render({canvasContext:c.getContext('2d'),viewport:vp});
+        const adv=()=>{n++;step();};
+        task.promise.then(adv).catch(adv);
+      }).catch(()=>{ if(lr) lr.remove(); });
+    };
+    step();
+  }).catch(err=>{
+    console.warn(err);
+    if(seq!==stageSeq) return;
+    otherStage(f,'COULD NOT RENDER PDF — TRY OPEN RAW');
+  });
+  }
 function frameStage(url,name,sandbox){
   stage.innerHTML=`<iframe class="frame" title="${esc(name)}" src="${esc(url)}"${sandbox?' sandbox="allow-scripts"':''}></iframe>`;
 }
